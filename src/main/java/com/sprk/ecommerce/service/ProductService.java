@@ -42,4 +42,13 @@ public class ProductService {
         return productRequests;
 
     }
+    public ProductRequest getProductById(int productId) {
+        Product product = productRepository.findById(productId).orElse(null);
+
+        if(product != null) {
+            return productMapper.mapProductToProductRequest(product);
+        }
+        return null;
+
+    }
 }
