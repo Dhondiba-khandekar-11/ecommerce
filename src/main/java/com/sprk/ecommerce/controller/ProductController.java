@@ -7,6 +7,7 @@ import com.sprk.ecommerce.service.ProductService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.message.StringFormattedMessage;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -38,10 +39,52 @@ public class ProductController {
     }
 
     @GetMapping("/admin/product/{productId}/edit")
-    public String showUpdateProductForm(@PathVariable int productId, Model model) {
+    public String showUpdateProductForm(@PathVariable int productId, Model model, RedirectAttributes redirectAttributes) {
         ProductRequest productRequest = productService.getProductById(productId);
+        if (productRequest == null) {
+            redirectAttributes.addFlashAttribute("errorMsg", String.format("Product with id = %d not found", productId));
+            return "redirect:/";
+        }
         model.addAttribute("productRequest", productRequest);
         return "update-product-form";
+    }
+
+    // Show Update Form
+    @GetMapping("/admin/product/{productId}/delete")
+    public String deleteProductById(@PathVariable int productId, Model model, RedirectAttributes redirectAttributes) {
+        ProductRequest productRequest = productService.getProductById(productId);
+        if (productRequest == null) {
+            redirectAttributes.addFlashAttribute("errorMsg", String.format("Product with id = %d not found", productId));
+            return "redirect:/";
+        }
+
+        boolean result = productService.deleteProduct(productRequest);
+
+        redirectAttributes.addFlashAttribute("errorMsg", String.format("Product with id = %d deleted successfully", productId));
+        return "redirect:/";
+    }
+
+    // Update data
+    @PostMapping("/admin/product/edit")
+    public String processUpdateProductForm(@Valid @ModelAttribute("productRequest") ProductRequest productRequest, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+
+        if (bindingResult.hasErrors()) {
+//            System.out.println(productRequest);
+            return "productform";
+        } else {
+//            System.out.println(productRequest);
+            boolean result = productService.updateProduct(productRequest);
+            if (result) {
+                String message = "Product: " + productRequest.getProductName() + " has been updated successfully";
+                redirectAttributes.addFlashAttribute("successMsg", message);
+                return "redirect:/product/"+productRequest.getProductId();
+            } else {
+
+                String message = "Some thing wrong happen!!";
+                redirectAttributes.addFlashAttribute("errorMsg", message);
+                return "redirect:/";
+            }
+        }
     }
 
     @GetMapping("/product/")
