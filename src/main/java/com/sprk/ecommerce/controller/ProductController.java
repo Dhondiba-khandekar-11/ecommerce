@@ -7,7 +7,6 @@ import com.sprk.ecommerce.service.ProductService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.logging.log4j.message.StringFormattedMessage;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -38,6 +37,7 @@ public class ProductController {
         return "productform";
     }
 
+    // Show Update Form
     @GetMapping("/admin/product/{productId}/edit")
     public String showUpdateProductForm(@PathVariable int productId, Model model, RedirectAttributes redirectAttributes) {
         ProductRequest productRequest = productService.getProductById(productId);
